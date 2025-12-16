@@ -1,0 +1,92 @@
+backend/
+│
+├── prisma/
+│   └── schema.prisma              # Modelos de la base de datos
+│
+├── src/
+│   │
+│   ├── generated/
+│   │   └── prisma/                # Prisma Client (AUTOGENERADO)
+│   │       ├── index.js
+│   │       ├── model/
+│   │       └── internal/
+│   │
+│   ├── config/
+│   │   ├── prisma.js              # Inicializa Prisma Client
+│   │   ├── env.js                 # Carga variables de entorno
+│   │   └── blockchain.js          # Config futura blockchain
+│   │
+│   ├── modules/                   # Lógica por dominio (ESCALABLE)
+│   │   │
+│   │   ├── gestion/               # Módulo GESTIÓN
+│   │   │   ├── canchas/
+│   │   │   │   ├── cancha.routes.js
+│   │   │   │   ├── cancha.controller.js
+│   │   │   │   └── cancha.service.js
+│   │   │   │
+│   │   │   ├── arbitros/
+│   │   │   │   ├── arbitro.routes.js
+│   │   │   │   ├── arbitro.controller.js
+│   │   │   │   └── arbitro.service.js
+│   │   │   │
+│   │   │   └── equipos/
+│   │   │       ├── equipo.routes.js
+│   │   │       ├── equipo.controller.js
+│   │   │       └── equipo.service.js
+│   │   │
+│   │   ├── campeonatos/            # Módulo CAMPEONATOS
+│   │   │   ├── categorias/
+│   │   │   │   ├── categoria.routes.js
+│   │   │   │   ├── categoria.controller.js
+│   │   │   │   └── categoria.service.js
+│   │   │   │
+│   │   │   ├── grupos/
+│   │   │   │   ├── grupo.routes.js
+│   │   │   │   ├── grupo.controller.js
+│   │   │   │   └── grupo.service.js
+│   │   │   │
+│   │   │   └── campeonatos/
+│   │   │       ├── campeonato.routes.js
+│   │   │       ├── campeonato.controller.js
+│   │   │       └── campeonato.service.js
+│   │   │
+│   │   ├── usuarios/               # Módulo USUARIOS
+│   │   │   ├── delegados/
+│   │   │   │   ├── delegado.controller.js
+│   │   │   │   └── delegado.service.js
+│   │   │   │
+│   │   │   ├── vocales/
+│   │   │   │   ├── vocal.controller.js
+│   │   │   │   └── vocal.service.js
+│   │   │   │
+│   │   │   ├── auth/
+│   │   │   │   ├── auth.routes.js
+│   │   │   │   └── auth.service.js
+│   │   │   │
+│   │   │   └── usuario.routes.js
+│   │   │
+│   │   ├── actas/                  # NÚCLEO DEL PROYECTO
+│   │   │   ├── acta.routes.js
+│   │   │   ├── acta.controller.js
+│   │   │   └── acta.service.js
+│   │   │
+│   │   ├── blockchain/             # Aislado (muy importante)
+│   │   │   ├── blockchain.service.js
+│   │   │   └── hash.util.js
+│   │   │
+│   │   ├── middlewares/
+│   │   │   ├── auth.middleware.js
+│   │   │   ├── role.middleware.js
+│   │   │   └── error.middleware.js
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── response.js
+│   │   │   ├── validators.js
+│   │   │   └── logger.js
+│   │   │
+│   │   ├── app.js                  # Configuración Express
+│   │   └── server.js               # Arranque del servidor
+│
+├── .env
+├── package.json
+└── README.md
