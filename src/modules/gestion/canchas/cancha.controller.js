@@ -54,36 +54,7 @@ export const listarCanchasController = async (req, res) => {
   }
 };
 
-/**
- * Obtener una cancha específica por ID
- */
-export const obtenerCanchaController = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { incluirEliminadas } = req.query;
-    
-    const cancha = await canchaService.obtenerCanchaPorId(
-      id, 
-      incluirEliminadas === 'true'
-    );
-    
-    res.status(200).json({
-      success: true,
-      data: cancha,
-      message: 'Cancha obtenida exitosamente'
-    });
-  } catch (error) {
-    console.error('Error en obtenerCanchaController:', error);
-    
-    const statusCode = error.message.includes('no encontrada') ? 404 : 500;
-    
-    res.status(statusCode).json({
-      success: false,
-      error: error.message || 'Cancha no encontrada',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-};
+
 
 /**
  * Editar una cancha existente
@@ -259,223 +230,8 @@ export const restaurarCanchaController = async (req, res) => {
   }
 };
 
-/**
- * Listar canchas eliminadas (para administradores)
- */
-export const listarCanchasEliminadasController = async (req, res) => {
-  try {
-    const canchas = await canchaService.listarCanchasEliminadas();
-    
-    res.status(200).json({
-      success: true,
-      data: canchas,
-      count: canchas.length,
-      message: canchas.length > 0 
-        ? 'Canchas eliminadas obtenidas exitosamente' 
-        : 'No hay canchas eliminadas'
-    });
-  } catch (error) {
-    console.error('Error en listarCanchasEliminadasController:', error);
-    
-    res.status(500).json({
-      success: false,
-      error: 'Error al obtener canchas eliminadas',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-};
+ 
 
-/**
- * Listar TODAS las canchas (incluyendo eliminadas - para administradores)
- */
-export const listarTodasCanchasController = async (req, res) => {
-  try {
-    const canchas = await canchaService.listarTodasCanchas();
-    
-    res.status(200).json({
-      success: true,
-      data: canchas,
-      count: canchas.length,
-      message: 'Todas las canchas obtenidas exitosamente'
-    });
-  } catch (error) {
-    console.error('Error en listarTodasCanchasController:', error);
-    
-    res.status(500).json({
-      success: false,
-      error: 'Error al obtener todas las canchas',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-};
-
-// ============================================
-// CONTROLADORES PARA BÚSQUEDA Y FILTROS
-// ============================================
-
-/**
- * Buscar canchas por criterios
- */
-export const buscarCanchasController = async (req, res) => {
-  try {
-    const { 
-      nombre, 
-      tipo_deporte, 
-      ubicacion, 
-      estado,
-      eliminado,
-      pagina = 1,
-      limite = 10
-    } = req.query;
-    
-    const filtros = {};
-    
-    if (nombre) filtros.nombre = nombre;
-    if (tipo_deporte) filtros.tipo_deporte = tipo_deporte;
-    if (ubicacion) filtros.ubicacion = ubicacion;
-    if (estado !== undefined) filtros.estado = estado === 'true';
-    if (eliminado !== undefined) filtros.eliminado = eliminado === 'true';
-    
-    const resultado = await canchaService.buscarCanchas(filtros, {
-      pagina: parseInt(pagina),
-      limite: parseInt(limite)
-    });
-    
-    res.status(200).json({
-      success: true,
-      data: resultado.canchas,
-      paginacion: {
-        pagina: resultado.pagina,
-        limite: resultado.limite,
-        total: resultado.total,
-        totalPaginas: resultado.totalPaginas,
-        hasNext: resultado.hasNext,
-        hasPrev: resultado.hasPrev
-      },
-      message: 'Búsqueda completada exitosamente'
-    });
-  } catch (error) {
-    console.error('Error en buscarCanchasController:', error);
-    
-    res.status(500).json({
-      success: false,
-      error: 'Error al buscar canchas',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-};
-
-/**
- * Obtener estadísticas de canchas
- */
-export const obtenerEstadisticasController = async (req, res) => {
-  try {
-    const estadisticas = await canchaService.obtenerEstadisticas();
-    
-    res.status(200).json({
-      success: true,
-      data: estadisticas,
-      message: 'Estadísticas obtenidas exitosamente'
-    });
-  } catch (error) {
-    console.error('Error en obtenerEstadisticasController:', error);
-    
-    res.status(500).json({
-      success: false,
-      error: 'Error al obtener estadísticas',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-};
-
-// ============================================
-// CONTROLADOR DE SALUD (HEALTH CHECK)
-// ============================================
-
-/**
- * Verificar estado del servicio de canchas
- */
-export const healthCheckController = async (req, res) => {
-  try {
-    // Verificar conexión a la base de datos
-    await canchaService.healthCheck();
-    
-    res.status(200).json({
-      success: true,
-      message: 'Servicio de canchas operativo',
-      timestamp: new Date().toISOString(),
-      service: 'canchas-service',
-      status: 'healthy'
-    });
-  } catch (error) {
-    console.error('Error en healthCheckController:', error);
-    
-    res.status(503).json({
-      success: false,
-      message: 'Servicio de canchas no disponible',
-      timestamp: new Date().toISOString(),
-      service: 'canchas-service',
-      status: 'unhealthy',
-      error: error.message
-    });
-  }
-};
-
-// ============================================
-// CONTROLADOR PARA BULK OPERATIONS
-// ============================================
-
-/**
- * Operaciones masivas en canchas
- */
-export const bulkOperationsController = async (req, res) => {
-  try {
-    const { operation, ids, data } = req.body;
-    
-    if (!operation || !Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Se requiere una operación y una lista de IDs válida'
-      });
-    }
-    
-    let result;
-    
-    switch (operation) {
-      case 'habilitar':
-        result = await canchaService.habilitarMultiplesCanchas(ids);
-        break;
-      case 'deshabilitar':
-        result = await canchaService.deshabilitarMultiplesCanchas(ids);
-        break;
-      case 'eliminar':
-        result = await canchaService.eliminarMultiplesCanchas(ids);
-        break;
-      case 'restaurar':
-        result = await canchaService.restaurarMultiplesCanchas(ids);
-        break;
-      default:
-        return res.status(400).json({
-          success: false,
-          error: 'Operación no válida. Opciones: habilitar, deshabilitar, eliminar, restaurar'
-        });
-    }
-    
-    res.status(200).json({
-      success: true,
-      data: result,
-      message: `Operación "${operation}" completada en ${result.length} canchas`
-    });
-  } catch (error) {
-    console.error('Error en bulkOperationsController:', error);
-    
-    res.status(500).json({
-      success: false,
-      error: error.message || 'Error en operación masiva',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-};
 
 // ============================================
 // EXPORTAR TODOS LOS CONTROLADORES
@@ -485,7 +241,6 @@ export default {
   // CRUD básico
   crearCanchaController,
   listarCanchasController,
-  obtenerCanchaController,
   editarCanchaController,
   
   // Gestión de estado
@@ -495,17 +250,6 @@ export default {
   
   // Soft delete
   eliminarCanchaController,
-  restaurarCanchaController,
-  listarCanchasEliminadasController,
-  listarTodasCanchasController,
+
   
-  // Búsqueda y filtros
-  buscarCanchasController,
-  obtenerEstadisticasController,
-  
-  // Health check
-  healthCheckController,
-  
-  // Bulk operations
-  bulkOperationsController
 };

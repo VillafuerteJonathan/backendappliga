@@ -90,3 +90,7 @@ backend/
 ├── .env
 ├── package.json
 └── README.md
+
+comandos"
+\c ldpapp
+\d arbitros
