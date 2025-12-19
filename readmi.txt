@@ -1,19 +1,11 @@
 backend/
 │
-├── prisma/
-│   └── schema.prisma              # Modelos de la base de datos
-│
+
 ├── src/
 │   │
-│   ├── generated/
-│   │   └── prisma/                # Prisma Client (AUTOGENERADO)
-│   │       ├── index.js
-│   │       ├── model/
-│   │       └── internal/
 │   │
 │   ├── config/
-│   │   ├── prisma.js              # Inicializa Prisma Client
-│   │   ├── env.js                 # Carga variables de entorno
+│   │   ├── db.js                 # Carga variables de entorno
 │   │   └── blockchain.js          # Config futura blockchain
 │   │
 │   ├── modules/                   # Lógica por dominio (ESCALABLE)
@@ -94,3 +86,23 @@ backend/
 comandos"
 \c ldpapp
 \d arbitros
+
+
+base de datos:
+CREATE TABLE public.usuarios (
+	    id_usuario      uuid                     NOT NULL DEFAULT gen_random_uuid(),
+	    nombre          character varying(100)   NOT NULL,
+	    apellido        character varying(100)   NOT NULL,
+	    cedula          character varying(10)    UNIQUE NOT NULL,
+	    correo          character varying(100)   UNIQUE NOT NULL,
+	    telefono        character varying(20),
+	    rol             character varying(20)    NOT NULL, -- ej: 'admin', 'vocal', 'delegado', 'representante'
+	    estado          boolean                  DEFAULT true,  -- habilitado o no
+	    eliminado       boolean                  DEFAULT false, -- soft delete
+	    fecha_registro  timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	    password_hash   text                      NOT NULL,
+	
+	    CONSTRAINT usuarios_pkey PRIMARY KEY (id_usuario)
+	);
+
+    

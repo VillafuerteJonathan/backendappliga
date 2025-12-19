@@ -58,7 +58,7 @@ export const listarArbitros = async () => {
 // EDITAR ÁRBITRO
 // ============================================
 export const editarArbitro = async (id, data) => {
-  const { nombres, apellidos,cedula, telefono, correo, direccion } = data;
+  const { nombres, apellidos, cedula, telefono, correo, direccion } = data;
 
   const result = await pool.query(
     `UPDATE arbitros
@@ -75,11 +75,19 @@ export const editarArbitro = async (id, data) => {
   );
 
   if (result.rows.length === 0) {
-    throw new Error("Árbitro no encontrado o eliminado");
+    return {
+      success: false,
+      message: "Árbitro no encontrado o eliminado",
+    };
   }
 
-  return result.rows[0];
+  return {
+    success: true,
+    message: "Árbitro actualizado correctamente",
+    data: result.rows[0],
+  };
 };
+
 
 // ============================================
 // ELIMINAR ÁRBITRO (SOFT DELETE)
