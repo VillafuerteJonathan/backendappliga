@@ -3,6 +3,7 @@ import canchaRoutes from "./modules/gestion/canchas/cancha.routes.js";
 import arbitroRoutes from "./modules/gestion/arbitros/arbitros.router.js";
 import authRoutes from "./modules/usuarios/auth/auth.routes.js";
 import delegadosRouter from './modules/usuarios/delegados/delegados.router.js';
+import vocalesRouter from './modules/usuarios/vocales/vocales.router.js';
 import { UsuarioService } from './modules/usuarios/admin.service.js';
 
 import cors from "cors";
@@ -19,5 +20,6 @@ app.use('/api/auth', authRoutes);
 app.use("/api/canchas", canchaRoutes);
 app.use("/api/arbitros", arbitroRoutes);
 app.use('/api/delegados', delegadosRouter);
+app.use('/api/vocales', vocalesRouter);
 
 app.listen(3001, () => console.log("Servidor corriendo en puerto 3001"));
