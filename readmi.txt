@@ -105,4 +105,25 @@ CREATE TABLE public.usuarios (
 	    CONSTRAINT usuarios_pkey PRIMARY KEY (id_usuario)
 	);
 
-    
+    CREATE TABLE IF NOT EXISTS public.equipos (
+    id_equipo        uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    nombre           varchar(100) NOT NULL,
+    descripcion      text,
+    categoria_id     uuid NOT NULL,
+    representante_id uuid NOT NULL,
+    estado           boolean DEFAULT true,
+    eliminado        boolean DEFAULT false,
+    fecha_registro   timestamp with time zone DEFAULT now(),
+    logo_url         varchar(255),
+
+    CONSTRAINT fk_equipo_categoria
+        FOREIGN KEY (categoria_id)
+        REFERENCES public.categorias (id_categoria),
+
+    CONSTRAINT fk_equipo_representante
+        FOREIGN KEY (representante_id)
+        REFERENCES public.usuarios (id_usuario),
+
+    CONSTRAINT uque_nombre_categoria
+        UNIQUE (nombre, categoria_id)
+);
