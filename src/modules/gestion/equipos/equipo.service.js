@@ -41,7 +41,7 @@ export const crearEquipo = async (data) => {
   return result.rows[0];
     } catch (error) {   
         if (error.code === "23505") {
-            throw new Error("El nombre del equipo ya existe");
+            throw new Error("Ya existe un equipo con ese nombre en la misma categoría");
         }   
 };  
         throw new Error("Error al crear el equipo");
@@ -123,35 +123,43 @@ export const eliminarEquipo = async (id) => {
 
   return result.rows[0];
 };
-
 // =============================
 // HABILITAR / DESHABILITAR
 // =============================
 export const habilitarEquipo = async (id) => {
   const result = await pool.query(
-    `UPDATE equipos
-     SET estado = true
-     WHERE id_equipo = $1 AND eliminado = false
-     RETURNING *`,
+    `
+    UPDATE equipos
+    SET estado = true
+    WHERE id_equipo = $1
+      AND eliminado = false
+    RETURNING *
+    `,
     [id]
   );
 
-  if (!result.rows.length) throw new Error("Equipo no encontrado");
+  if (result.rowCount === 0) {
+    throw new Error("Equipo no encontrado o eliminado");
+  }
 
   return result.rows[0];
 };
 
 export const deshabilitarEquipo = async (id) => {
   const result = await pool.query(
-    `UPDATE equipos
-     SET estado = false
-     WHERE id_equipo = $1 AND eliminado = false
-     RETURNING *`,
+    `
+    UPDATE equipos
+    SET estado = false
+    WHERE id_equipo = $1
+      AND eliminado = false
+    RETURNING *
+    `,
     [id]
   );
 
-  if (!result.rows.length) throw new Error("Equipo no encontrado");
+  if (result.rowCount === 0) {
+    throw new Error("Equipo no encontrado o eliminado");
+  }
 
   return result.rows[0];
 };
-

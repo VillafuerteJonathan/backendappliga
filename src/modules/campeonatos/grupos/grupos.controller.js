@@ -17,13 +17,24 @@ export const crearGrupoController = async (req, res) => {
     });
   } catch (error) {
     console.error('Error en crearGrupoController:', error);
+
+    // 🔹 Si el error es de llave duplicada
+    if (error.code === '23505' && error.constraint === 'grupo_nombre_key') {
+      return res.status(400).json({
+        success: false,
+        error: 'Error al guardar grupo: ya existe un grupo con ese nombre',
+      });
+    }
+
+    // Otros errores
     res.status(500).json({
       success: false,
-      error: error.message || 'Error al crear grupo',
+      error: 'Error al guardar grupo',
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
+
 
 /**
  * Listar todos los grupos activos (no eliminados)

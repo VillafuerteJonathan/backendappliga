@@ -8,6 +8,7 @@ import categoriasRouter from './modules/campeonatos/categorias/categorias.router
 import { UsuarioService } from './modules/usuarios/admin.service.js';
 import equiposRoutes from "./modules/gestion/equipos/equipo.routes.js";
 import gruposRoutes from "./modules/campeonatos/grupos/grupos.router.js";
+import campeonatosRoutes from "./modules/campeonatos/torneo/campeonato.router.js";
 
 import cors from "cors";
 
@@ -27,5 +28,6 @@ app.use('/api/vocales', vocalesRouter);
 app.use('/api/categorias', categoriasRouter);
 app.use('/api/equipos', equiposRoutes);
 app.use('/api/grupos', gruposRoutes);
+app.use('/api/campeonatos', campeonatosRoutes);
 
 app.listen(3001, () => console.log("Servidor corriendo en puerto 3001"));

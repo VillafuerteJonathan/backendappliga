@@ -61,17 +61,36 @@ export const eliminar = async (req, res) => {
 export const habilitar = async (req, res) => {
   try {
     const equipo = await habilitarEquipo(req.params.id);
-    res.json({ success: true, data: equipo });
+
+    res.json({
+      success: true,
+      message: "Equipo habilitado correctamente",
+      data: equipo
+    });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message || "Error al habilitar el equipo"
+    });
   }
 };
 
+/* =============================
+   DESHABILITAR
+============================= */
 export const deshabilitar = async (req, res) => {
   try {
     const equipo = await deshabilitarEquipo(req.params.id);
-    res.json({ success: true, data: equipo });
+
+    res.json({
+      success: true,
+      message: "Equipo deshabilitado correctamente",
+      data: equipo
+    });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({
+      success: false,
+      message: error.message || "Error al deshabilitar el equipo"
+    });
   }
 };
