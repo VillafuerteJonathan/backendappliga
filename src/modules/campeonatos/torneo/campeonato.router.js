@@ -12,5 +12,7 @@ router.delete('/:id', CampeonatosController.eliminar.bind(CampeonatosController)
 router.get('/:idCampeonato/grupos/:idGrupo/equipos', CampeonatosController.obtenerEquiposGrupo.bind(CampeonatosController));
 router.post('/:idCampeonato/grupos/:idGrupo/equipos', CampeonatosController.agregarEquipoAGrupo.bind(CampeonatosController));
 router.delete('/:idCampeonato/grupos/:idGrupo/equipos/:idEquipo', CampeonatosController.removerEquipoDeGrupo.bind(CampeonatosController));
+router.post("/:id/generar-partidos", CampeonatosController.generarPartidos.bind(CampeonatosController));
+
 
 export default router;

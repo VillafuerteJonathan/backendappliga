@@ -62,6 +62,13 @@ class CampeonatosController {
   // =========================
   static async crear(req, res) {
     try {
+      const hoy = new Date();
+        const inicio = new Date(datos.fecha_inicio);
+
+        if (inicio < hoy) {
+          errores.push("La fecha de inicio no puede ser anterior a hoy");
+        }
+
       const errores = this.#validar(req.body);
       if (errores.length) {
         return res.status(400).json({ success: false, errors: errores });
@@ -84,7 +91,20 @@ class CampeonatosController {
       if (!id || !isUUID(id)) {
         return res.status(400).json({ success: false, error: "ID inválido" });
       }
+           const campeonatoActual = await CampeonatosService.obtenerConDetalles(id);
+      if (!campeonatoActual) {
+        return res.status(404).json({ success: false, error: "No encontrado" });
+      }
 
+      const hoy = new Date();
+      const inicio = new Date(campeonatoActual.fecha_inicio);
+
+      if (inicio <= hoy) {
+        return res.status(409).json({
+          success: false,
+          error: "El campeonato ya inició, no se puede editar"
+        });
+      }
       const errores = this.#validar(req.body, true);
       if (errores.length) {
         return res.status(400).json({ success: false, errors: errores });
@@ -137,6 +157,21 @@ class CampeonatosController {
         return res.status(400).json({ success: false, error: "ID inválido" });
       }
 
+      // 🔒 BLOQUEO POR FECHA DE INICIO
+      const campeonato = await CampeonatosService.obtenerConDetalles(id);
+      if (!campeonato) {
+        return res.status(404).json({ success: false, error: "No encontrado" });
+      }
+
+      const hoy = new Date();
+      const inicio = new Date(campeonato.fecha_inicio);
+
+      if (inicio <= hoy) {
+        return res.status(409).json({
+          success: false,
+          error: "El campeonato ya inició, no se puede eliminar"
+        });
+      }
       await CampeonatosService.eliminar(id);
       res.json({ success: true, message: "Campeonato eliminado" });
 
@@ -224,6 +259,27 @@ class CampeonatosController {
       this.#manejarError(e, res);
     }
   }
-}
+static async generarPartidos(req, res) {
+  try {
+    const { id } = req.params;
 
+    if (!id || !isUUID(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "ID campeonato inválido"
+      });
+    }
+
+    await CampeonatosService.generarPartidos(id);
+
+    res.json({
+      success: true,
+      message: "Partidos generados correctamente"
+    });
+
+  } catch (e) {
+    this.#manejarError(e, res);
+  }
+}
+}
 export default CampeonatosController;

@@ -409,6 +409,116 @@ class CampeonatosService {
     const result = await pool.query(query, [idCampeonato]);
     return result.rows[0];
   }
-}
 
+
+  // ===============================
+  // GENERAR PARTIDOS
+  // ===============================
+ static async generarPartidos(idCampeonato) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 1️⃣ Validar campeonato
+    const campRes = await client.query(
+      `
+      SELECT fecha_inicio
+      FROM campeonatos
+      WHERE id_campeonato = $1
+        AND eliminado = FALSE
+      `,
+      [idCampeonato]
+    );
+
+    if (campRes.rowCount === 0) {
+      throw new Error("Campeonato no encontrado");
+    }
+
+    const fechaInicio = new Date(campRes.rows[0].fecha_inicio);
+    const hoy = new Date();
+
+    if (fechaInicio <= hoy) {
+      throw new Error("El campeonato ya inició, no se pueden generar partidos");
+    }
+
+    // 2️⃣ Obtener grupos del campeonato
+    const gruposRes = await client.query(
+      `
+      SELECT g.id_grupo
+      FROM campeonato_grupos cg
+      JOIN grupo g ON g.id_grupo = cg.id_grupo
+      WHERE cg.id_campeonato = $1
+      `,
+      [idCampeonato]
+    );
+
+    // 3️⃣ Recorrer grupos
+    for (const { id_grupo } of gruposRes.rows) {
+
+      // 4️⃣ Obtener equipos del grupo
+      const equiposRes = await client.query(
+        `
+        SELECT ge.id_equipo
+        FROM grupo_equipos ge
+        WHERE ge.id_campeonato = $1
+          AND ge.id_grupo = $2
+        `,
+        [idCampeonato, id_grupo]
+      );
+
+      const equipos = equiposRes.rows;
+
+      if (equipos.length < 2) continue;
+
+      // 5️⃣ Generar partidos (ida y vuelta)
+      for (let i = 0; i < equipos.length; i++) {
+        for (let j = i + 1; j < equipos.length; j++) {
+          const local = equipos[i].id_equipo;
+          const visitante = equipos[j].id_equipo;
+
+          // Ida
+          await client.query(
+            `
+            INSERT INTO partidos (
+              id_campeonato,
+              id_grupo,
+              equipo_local,
+              equipo_visitante
+            )
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT DO NOTHING
+            `,
+            [idCampeonato, id_grupo, local, visitante]
+          );
+
+          // Vuelta
+          await client.query(
+            `
+            INSERT INTO partidos (
+              id_campeonato,
+              id_grupo,
+              equipo_local,
+              equipo_visitante
+            )
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT DO NOTHING
+            `,
+            [idCampeonato, id_grupo, visitante, local]
+          );
+        }
+      }
+    }
+
+    await client.query("COMMIT");
+    return { success: true };
+
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+}
 export default CampeonatosService;
