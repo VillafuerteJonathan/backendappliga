@@ -8,6 +8,7 @@ export const crearEquipo = async (data) => {
     nombre,
     descripcion,
     categoria_id,
+    cancha_id,
     logo_url,
     nombre_representante,
     celular_representante
@@ -19,6 +20,7 @@ export const crearEquipo = async (data) => {
       nombre,
       descripcion,
       categoria_id,
+      cancha_id,
       logo_url,
       nombre_representante,
       celular_representante,
@@ -26,12 +28,13 @@ export const crearEquipo = async (data) => {
       eliminado,
       fecha_registro
     )
-    VALUES ($1,$2,$3,$4,$5,$6,true,false,NOW())
+    VALUES ($1,$2,$3,$4,$5,$6,$7,true,false,NOW())
     RETURNING *`,
     [
       nombre,
       descripcion,
       categoria_id,
+      cancha_id,
       logo_url || null,
       nombre_representante,
       celular_representante
@@ -69,6 +72,7 @@ export const editarEquipo = async (id, data) => {
     nombre,
     descripcion,
     categoria_id,
+    cancha_id,
     logo_url,
     nombre_representante,
     celular_representante,
@@ -80,16 +84,18 @@ export const editarEquipo = async (id, data) => {
      SET nombre = $1,
          descripcion = $2,
          categoria_id = $3,
-         logo_url = $4,
-         nombre_representante = $5,
-         celular_representante = $6,
-         estado = $7
-     WHERE id_equipo = $8 AND eliminado = false
+         cancha_id = $4,
+         logo_url = $5,
+         nombre_representante = $6,
+         celular_representante = $7,
+         estado = $8
+     WHERE id_equipo = $9 AND eliminado = false
      RETURNING *`,
     [
       nombre,
       descripcion,
       categoria_id,
+      cancha_id,
       logo_url || null,
       nombre_representante,
       celular_representante,

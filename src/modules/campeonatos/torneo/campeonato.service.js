@@ -196,24 +196,24 @@ class CampeonatosService {
       console.log('=== OBTENIENDO TODOS LOS CAMPEONATOS ===');
       
       const query = `
-        SELECT 
-          c.*,
-          COALESCE(
-            (SELECT COUNT(DISTINCT cg.id_grupo) 
-             FROM campeonato_grupos cg 
-             WHERE cg.id_campeonato = c.id_campeonato),
-            0
-          ) as total_grupos,
-          COALESCE(
-            (SELECT COUNT(ge.id_equipo) 
-             FROM grupo_equipos ge 
-             WHERE ge.id_campeonato = c.id_campeonato),
-            0
-          ) as total_equipos
-        FROM campeonatos c
-        WHERE c.eliminado = FALSE 
-        ORDER BY c.fecha_registro DESC
-      `;
+          SELECT 
+            c.*,
+            COALESCE(
+              (SELECT COUNT(DISTINCT cg.id_grupo) 
+              FROM campeonato_grupos cg 
+              WHERE cg.id_campeonato = c.id_campeonato),
+              0
+            ) as total_grupos,
+            COALESCE(
+              (SELECT COUNT(ge.id_equipo) 
+              FROM grupo_equipos ge 
+              WHERE ge.id_campeonato = c.id_campeonato),
+              0
+            ) as total_equipos
+          FROM campeonatos c
+          WHERE c.eliminado = FALSE 
+          ORDER BY c.fecha_registro DESC
+        `;
       
       const res = await pool.query(query);
       console.log(`Total campeonatos encontrados: ${res.rows.length}`);
@@ -411,19 +411,19 @@ class CampeonatosService {
   }
 
 
-  // ===============================
-  // GENERAR PARTIDOS
-  // ===============================
- static async generarPartidos(idCampeonato) {
+// ===============================
+// GENERAR PARTIDOS
+// ===============================
+static async generarPartidos(idCampeonato) {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    // 1️⃣ Validar campeonato
+    // 1️⃣ Validar campeonato y estado de generación
     const campRes = await client.query(
       `
-      SELECT fecha_inicio
+      SELECT partidos_generados
       FROM campeonatos
       WHERE id_campeonato = $1
         AND eliminado = FALSE
@@ -435,11 +435,8 @@ class CampeonatosService {
       throw new Error("Campeonato no encontrado");
     }
 
-    const fechaInicio = new Date(campRes.rows[0].fecha_inicio);
-    const hoy = new Date();
-
-    if (fechaInicio <= hoy) {
-      throw new Error("El campeonato ya inició, no se pueden generar partidos");
+    if (campRes.rows[0].partidos_generados) {
+      throw new Error("Los partidos ya fueron generados");
     }
 
     // 2️⃣ Obtener grupos del campeonato
@@ -456,11 +453,14 @@ class CampeonatosService {
     // 3️⃣ Recorrer grupos
     for (const { id_grupo } of gruposRes.rows) {
 
-      // 4️⃣ Obtener equipos del grupo
+      // 4️⃣ Obtener equipos del grupo + su cancha
       const equiposRes = await client.query(
         `
-        SELECT ge.id_equipo
+        SELECT 
+          e.id_equipo,
+          e.cancha_id
         FROM grupo_equipos ge
+        JOIN equipos e ON e.id_equipo = ge.id_equipo
         WHERE ge.id_campeonato = $1
           AND ge.id_grupo = $2
         `,
@@ -474,41 +474,78 @@ class CampeonatosService {
       // 5️⃣ Generar partidos (ida y vuelta)
       for (let i = 0; i < equipos.length; i++) {
         for (let j = i + 1; j < equipos.length; j++) {
-          const local = equipos[i].id_equipo;
-          const visitante = equipos[j].id_equipo;
 
-          // Ida
+          const local = equipos[i];
+          const visitante = equipos[j];
+
+          // ======================
+          // PARTIDO IDA
+          // ======================
           await client.query(
             `
             INSERT INTO partidos (
               id_campeonato,
               id_grupo,
               equipo_local,
-              equipo_visitante
+              equipo_visitante,
+              cancha_partido,
+              fecha_encuentro,
+              hora_encuentro
             )
-            VALUES ($1, $2, $3, $4)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT DO NOTHING
             `,
-            [idCampeonato, id_grupo, local, visitante]
+            [
+              idCampeonato,
+              id_grupo,
+              local.id_equipo,
+              visitante.id_equipo,
+              local.cancha_id,
+              "Por definir",
+              "Por definir"
+            ]
           );
 
-          // Vuelta
+          // ======================
+          // PARTIDO VUELTA
+          // ======================
           await client.query(
             `
             INSERT INTO partidos (
               id_campeonato,
               id_grupo,
               equipo_local,
-              equipo_visitante
+              equipo_visitante,
+              cancha_partido,
+              fecha_encuentro,
+              hora_encuentro
             )
-            VALUES ($1, $2, $3, $4)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT DO NOTHING
             `,
-            [idCampeonato, id_grupo, visitante, local]
+            [
+              idCampeonato,
+              id_grupo,
+              visitante.id_equipo,
+              local.id_equipo,
+              visitante.cancha_id,
+              "Por definir",
+              "Por definir"
+            ]
           );
         }
       }
     }
+
+    // 6️⃣ Marcar partidos como generados
+    await client.query(
+      `
+      UPDATE campeonatos
+      SET partidos_generados = TRUE
+      WHERE id_campeonato = $1
+      `,
+      [idCampeonato]
+    );
 
     await client.query("COMMIT");
     return { success: true };
@@ -520,5 +557,6 @@ class CampeonatosService {
     client.release();
   }
 }
+
 }
 export default CampeonatosService;

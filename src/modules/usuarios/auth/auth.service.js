@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
-const JWT_EXPIRES_IN = '8h';
+const JWT_EXPIRES_IN = '2h';
 
 export const AuthService = {
 

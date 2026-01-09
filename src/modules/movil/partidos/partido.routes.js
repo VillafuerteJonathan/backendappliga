@@ -1,36 +1,28 @@
 import express from 'express';
 import partidoController from './partido.controller.js';
-import { auth, authorizeRoles } from '../../../middlewares/auth.middleware.js';
+import { auth } from '../../../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// Todas las rutas requieren autenticación
-router.use(auth);
+// Orden correcto de rutas: primero las más específicas
+router.get('/campeonatos/activos', partidoController.obtenerCampeonatosActivos);
 
-// Rutas específicas para vocales
-router.use(authorizeRoles('vocal'));
+// Detalles específicos
+router.get('/detalle/:idPartido', partidoController.obtenerPartidoDetalle);
+router.get('/:idPartido/verificar-integridad', partidoController.verificarIntegridad);
+router.get('/:idPartido/verificar-registro', partidoController.verificarPartidoYaRegistrado);
 
-// Obtener campeonatos activos para el vocal
-router.get('/campeonatos-activos', partidoController.obtenerCampeonatosActivos);
-
-// Obtener partidos pendientes por campeonato
-router.get('/campeonatos/:campeonatoId/partidos-pendientes', partidoController.obtenerPartidosPendientes);
-
-// Obtener detalle de un partido
-router.get('/partidos/:idPartido', partidoController.obtenerPartidoDetalle);
-
-// Registrar resultado del partido
-router.post('/partidos/:idPartido/registrar-resultado', partidoController.registrarResultado);
-
-// Obtener historial del vocal
-router.get('/historial', partidoController.obtenerHistorial);
-
-// Verificar integridad de acta
-router.get('/partidos/:idPartido/verificar-integridad', partidoController.verificarIntegridad);
-
-// Obtener estadísticas del vocal
+// Estadísticas y conteo
 router.get('/estadisticas', partidoController.obtenerEstadisticasVocal);
-// Agregar esta nueva ruta
-router.get('/partidos/:idPartido/verificar-registro', partidoController.verificarPartidoYaRegistrado);
+router.get('/:campeonatoId/conteo-estados', partidoController.obtenerConteoEstados);
+
+// Listado de partidos
+router.get('/:campeonatoId/partidos', partidoController.obtenerPartidosPendientes);
+
+// Registro de resultados
+router.post('/:idPartido/registrar', partidoController.registrarResultado);
+
+// Historial
+router.get('/historial', partidoController.obtenerHistorial);
 
 export default router;

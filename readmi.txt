@@ -127,3 +127,23 @@ CREATE TABLE public.usuarios (
     CONSTRAINT uque_nombre_categoria
         UNIQUE (nombre, categoria_id)
 );
+
+
+
+TRUNCATE TABLE partidos RESTART IDENTITY CASCADE;
+
+
+ Esquema |      Nombre       | Tipo  |  Due±o
+---------+-------------------+-------+----------
+ public  | actas_blockchain  | tabla | postgres
+ public  | arbitros          | tabla | postgres
+ public  | campeonato_grupos | tabla | postgres
+ public  | campeonatos       | tabla | postgres
+ public  | canchas           | tabla | postgres
+ public  | categorias        | tabla | postgres
+ public  | equipos           | tabla | postgres
+ public  | grupo             | tabla | postgres
+ public  | grupo_equipos     | tabla | postgres
+ public  | partidos          | tabla | postgres
+ public  | usuarios          | tabla | postgres
+(11 filas)
