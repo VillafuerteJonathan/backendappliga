@@ -158,11 +158,12 @@ class RegistroService {
         INSERT INTO actas_blockchain (
           id_partido,
           hash_acta,
-          vocal_id
+          vocal_id,
+          arbitro_id
         )
-        VALUES ($1, $2, $3)
+        VALUES ($1, $2, $3, $4)
         `,
-        [partidoId, hashActa, vocalId]
+        [partidoId, hashActa, vocalId, arbitroId]
       );
 
       await client.query('COMMIT');
