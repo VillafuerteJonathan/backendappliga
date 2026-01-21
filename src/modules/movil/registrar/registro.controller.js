@@ -2,7 +2,7 @@ import RegistroService from './registro.service.js';
 import { validate as isUUID } from 'uuid';
 import path from "path";
 import fs from "fs";
-import { calcularHash } from "../../blockchain/hash.util.js";
+import { calcularHash,  registrarActaBlockchain } from "../../blockchain/index.js";
 
 
 
@@ -175,20 +175,29 @@ async finalizarPartido(req, res) {
       arbitroId,
       hashActa
     });
+    
+      // 3️⃣ Registrar en blockchain
+      const tx = await registrarActaBlockchain({
+        idPartido: id,
+        hashActa,
+        arbitroId,
+        vocalId,
+        golesLocal,
+        golesVisitante
+      });
 
-    return res.status(200).json({
-      success: true,
-      message: "Partido finalizado correctamente"
-    });
-
-  } catch (error) {
-    console.error("❌ Error finalizando partido:", error);
-    return res.status(409).json({
-      success: false,
-      message: error.message
-    });
+      return res.status(200).json({
+        success: true,
+        message: "Partido finalizado y registrado en blockchain",
+        txHash: tx.txHash
+      });
+    } catch (error) {
+      console.error("❌ Error finalizando partido:", error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  
   }
-}
+
 // ===============================
 // SUBIR ACTAS
 // ===============================
