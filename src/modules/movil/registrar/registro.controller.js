@@ -206,10 +206,7 @@ async subirActas(req, res) {
     const { id } = req.params;
 
     if (!isUUID(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de partido inválido"
-      });
+      return res.status(400).json({ message: "ID de partido inválido" });
     }
 
     const frente = req.files?.frente?.[0];
@@ -217,12 +214,23 @@ async subirActas(req, res) {
 
     if (!frente || !dorso) {
       return res.status(400).json({
-        success: false,
         message: "Debe subir acta frente y dorso"
       });
     }
 
-    // ✅ Solo confirmamos subida
+    console.log("📁 FRENTE PATH:", frente.path);
+    console.log("📁 DORSO PATH:", dorso.path);
+
+    // 🔐 HASH REAL
+    const hashActa = await calcularHash(frente.path, dorso.path);
+
+    await RegistroService.guardarActas({
+      idPartido: id,
+      frente,
+      dorso,
+      hashActa
+    });
+
     return res.status(200).json({
       success: true,
       message: "Actas subidas correctamente"
@@ -232,11 +240,11 @@ async subirActas(req, res) {
     console.error("❌ Error subir actas:", error);
     return res.status(500).json({
       success: false,
-      message: "Error interno del servidor"
+      message: "No se pudo calcular hash de las fotos"
     });
   }
-
 }
+
 }
 
 export default new RegistroController();

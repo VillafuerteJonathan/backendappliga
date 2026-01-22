@@ -1,4 +1,5 @@
 import db from '../../../config/db.js';
+import { calcularHash } from "../../blockchain/index.js";
 
 class RegistroService {
 
@@ -197,6 +198,40 @@ async actualizarEncuentro(idPartido, fechaEncuentro, horaEncuentro) {
   return res.rows[0];
 }
 
+async guardarActas({ idPartido, frente, dorso, hashActa }) {
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    for (const archivo of [frente, dorso]) {
+      await client.query(
+        `
+        INSERT INTO actas_archivos (
+          id_partido,
+          tipo,
+          ruta_archivo,
+          hash_archivo
+        )
+        VALUES ($1, $2, $3, $4)
+        `,
+        [
+          idPartido,
+          archivo.fieldname, // frente | dorso
+          archivo.path,
+          hashActa
+        ]
+      );
+    }
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 }
 
 export default new RegistroService();

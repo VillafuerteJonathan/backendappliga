@@ -37,22 +37,8 @@ router.post(
     { name: 'frente', maxCount: 1 },
     { name: 'dorso', maxCount: 1 }
   ]),
-  async (req, res) => {
-    try {
-      console.log('📥 FILES:', req.files);
+  RegistroController.subirActas
 
-      return res.json({
-        success: true,
-        files: req.files
-      });
-    } catch (error) {
-      console.error('❌ ERROR ACTAS:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message
-      });
-    }
-  }
 );
 
 
