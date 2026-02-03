@@ -468,8 +468,33 @@ static async generarPartidos(idCampeonato) {
       );
 
       const equipos = equiposRes.rows;
+       if (equipos.length < 2) continue;
+      // ======================
+// INICIALIZAR TABLA DE POSICIONES (TODO EN 0)
+// ======================
+for (const equipo of equipos) {
+  await client.query(
+    `
+    INSERT INTO tabla_posiciones (
+      id_campeonato,
+      id_grupo,
+      id_equipo,
+      pj, pg, pe, pp,
+      gf, gc, dg, pts
+    )
+    VALUES ($1,$2,$3,0,0,0,0,0,0,0,0)
+    ON CONFLICT (id_campeonato, id_grupo, id_equipo) DO NOTHING
+    `,
+    [
+      idCampeonato,
+      id_grupo,
+      equipo.id_equipo
+    ]
+  );
+}
 
-      if (equipos.length < 2) continue;
+
+     
 
       // 5️⃣ Generar partidos (ida y vuelta)
       for (let i = 0; i < equipos.length; i++) {

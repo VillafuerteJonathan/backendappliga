@@ -12,8 +12,9 @@ import campeonatosRoutes from "./modules/campeonatos/torneo/campeonato.router.js
 import partidosRoutes from "./modules/movil/partidos/partido.routes.js";
 import registrarRouter from "./modules/movil/registrar/registro.router.js";
 import verificarRouter from "./modules/actas/verificacion/verificacion.routes.js";
+import posicionesRouter from "./modules/principal/posiciones/posiciones.routes.js";
 
-
+import path from "path"
 import cors from "cors";
 
 const app = express();
@@ -36,4 +37,12 @@ app.use('/api/campeonatos', campeonatosRoutes);
 app.use('/api/partidos', partidosRoutes);
 app.use("/api/registro", registrarRouter);
 app.use("/api/verificacion", verificarRouter);
+app.use("/api/posiciones", posicionesRouter);
+
+
+app.use(
+  "/api/uploads",
+  express.static(path.join(process.cwd(), "uploads"))
+);
+
 app.listen(3001, () => console.log("Servidor corriendo en puerto 3001"));

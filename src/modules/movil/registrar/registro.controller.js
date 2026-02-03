@@ -1,8 +1,12 @@
 import RegistroService from './registro.service.js';
 import { validate as isUUID } from 'uuid';
 import path from "path";
+import { keccak256, toUtf8Bytes } from "ethers";
+
 import fs from "fs";
 import { calcularHash,  registrarActaBlockchain } from "../../blockchain/index.js";
+import { rutaRelativaUploads } from "../../../utils/paths.js";
+
 
 
 
@@ -185,6 +189,9 @@ async finalizarPartido(req, res) {
         golesLocal,
         golesVisitante
       });
+      console.log("ID PARTIDO:", id);
+    console.log("HASH PARTIDO:", keccak256(toUtf8Bytes(id)));
+
 
       return res.status(200).json({
         success: true,
@@ -218,17 +225,22 @@ async subirActas(req, res) {
       });
     }
 
-    console.log("📁 FRENTE PATH:", frente.path);
-    console.log("📁 DORSO PATH:", dorso.path);
-
-    // 🔐 HASH REAL
+    // 🔐 Calcular hash usando rutas reales del sistema
     const hashActa = await calcularHash(frente.path, dorso.path);
 
+    // ✅ SOLO guardar lo necesario
     await RegistroService.guardarActas({
       idPartido: id,
-      frente,
-      dorso,
-      hashActa
+      frente: {
+        tipo: "frente",
+        ruta_archivo: rutaRelativaUploads(frente.path),
+        hash_archivo: hashActa
+      },
+      dorso: {
+        tipo: "dorso",
+        ruta_archivo: rutaRelativaUploads(dorso.path),
+        hash_archivo: hashActa
+      }
     });
 
     return res.status(200).json({
@@ -240,11 +252,10 @@ async subirActas(req, res) {
     console.error("❌ Error subir actas:", error);
     return res.status(500).json({
       success: false,
-      message: "No se pudo calcular hash de las fotos"
+      message: "No se pudo subir el acta"
     });
   }
 }
-
 }
 
 export default new RegistroController();

@@ -41,11 +41,25 @@ class CampeonatosController {
           }
         });
       }
+      const hoy = new Date();
+hoy.setHours(0, 0, 0, 0);
+
+if (datos.fecha_inicio) {
+  const inicio = new Date(datos.fecha_inicio);
+  inicio.setHours(0, 0, 0, 0);
+
+  if (inicio < hoy) {
+    errores.push("La fecha de inicio no puede ser anterior a hoy");
+  }
+}
+
     }
 
     return errores;
+    
   }
 
+  
   static #manejarError(error, res) {
     console.error(error);
     if (error.message?.includes("no encontrado")) {
@@ -61,28 +75,28 @@ class CampeonatosController {
   // CRUD CAMPEONATOS
   // =========================
   static async crear(req, res) {
-    try {
-      const hoy = new Date();
-        const inicio = new Date(datos.fecha_inicio);
+  try {
+    const errores = this.#validar(req.body); // ✅ PRIMERO
 
-        if (inicio < hoy) {
-          errores.push("La fecha de inicio no puede ser anterior a hoy");
-        }
-
-      const errores = this.#validar(req.body);
-      if (errores.length) {
-        return res.status(400).json({ success: false, errors: errores });
-      }
-
-      const campeonato =
-        await CampeonatosService.crearOCambiarCampeonatoCompleto(req.body);
-
-      res.status(201).json({ success: true, data: campeonato });
-
-    } catch (e) {
-      this.#manejarError(e, res);
+    if (errores.length) {
+      return res.status(400).json({
+        success: false,
+        errors: errores
+      });
     }
+
+    const campeonato =
+      await CampeonatosService.crearOCambiarCampeonatoCompleto(req.body);
+
+    res.status(201).json({
+      success: true,
+      data: campeonato
+    });
+
+  } catch (e) {
+    this.#manejarError(e, res);
   }
+}
 
   static async actualizar(req, res) {
     try {

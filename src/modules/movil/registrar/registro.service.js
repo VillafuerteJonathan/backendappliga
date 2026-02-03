@@ -197,8 +197,7 @@ async actualizarEncuentro(idPartido, fechaEncuentro, horaEncuentro) {
 
   return res.rows[0];
 }
-
-async guardarActas({ idPartido, frente, dorso, hashActa }) {
+async guardarActas({ idPartido, frente, dorso }) {
   const client = await db.connect();
 
   try {
@@ -217,9 +216,9 @@ async guardarActas({ idPartido, frente, dorso, hashActa }) {
         `,
         [
           idPartido,
-          archivo.fieldname, // frente | dorso
-          archivo.path,
-          hashActa
+          archivo.tipo,          // 'frente' | 'dorso'
+          archivo.ruta_archivo,  // ruta relativa
+          archivo.hash_archivo   // ✅ YA NO ES NULL
         ]
       );
     }
@@ -232,6 +231,7 @@ async guardarActas({ idPartido, frente, dorso, hashActa }) {
     client.release();
   }
 }
+
 }
 
 export default new RegistroService();

@@ -1,16 +1,15 @@
-// src/modules/blockchain/services/actasBlockchain.service.js
 import { actasContract } from "../contracts/ActasPartidos.contract.js";
+import { keccak256, toUtf8Bytes } from "ethers";
 
 /**
- * Registra un acta en la blockchain.
- * @param {Object} actaData - Datos del acta.
- * @param {string} actaData.idPartido - UUID del partido.
- * @param {string} actaData.hashActa - Hash SHA-256 del acta.
- * @param {string} actaData.arbitroId - UUID del árbitro.
- * @param {string} actaData.vocalId - UUID del vocal.
- * @param {number} actaData.golesLocal - Goles del equipo local.
- * @param {number} actaData.golesVisitante - Goles del equipo visitante.
- * @returns {Promise<Object>} - Retorna el hash de la transacción.
+ * Convierte UUID → bytes32
+ */
+function hashIdPartido(idPartido) {
+  return keccak256(toUtf8Bytes(idPartido));
+}
+
+/**
+ * Registrar acta en blockchain
  */
 export async function registrarActaBlockchain({
   idPartido,
@@ -21,8 +20,10 @@ export async function registrarActaBlockchain({
   golesVisitante
 }) {
   try {
+    const idPartidoHash = hashIdPartido(idPartido);
+
     const tx = await actasContract.registrarActa(
-      idPartido,
+      idPartidoHash,
       hashActa,
       arbitroId,
       vocalId,
@@ -30,47 +31,47 @@ export async function registrarActaBlockchain({
       golesVisitante
     );
 
-    await tx.wait(); // Espera a que la transacción sea confirmada
+    await tx.wait();
 
     return {
       success: true,
       txHash: tx.hash
     };
   } catch (error) {
-    console.error("Error registrando acta en blockchain:", error);
+    console.error("❌ Error registrando acta en blockchain:", error);
     return {
       success: false,
-      error: error.message
+      error: error.shortMessage || error.message
     };
   }
 }
 
 /**
- * Obtiene un acta de la blockchain por el ID del partido.
- * @param {string} idPartido - UUID del partido.
- * @returns {Promise<Object>} - Retorna los datos del acta.
+ * Obtener acta desde blockchain
  */
 export async function obtenerActaBlockchain(idPartido) {
   try {
-    const acta = await actasContract.obtenerActa(idPartido);
+    const idPartidoHash = hashIdPartido(idPartido);
+
+    const acta = await actasContract.obtenerActa(idPartidoHash);
 
     return {
       success: true,
       data: {
-        idPartido: acta[0],
+        idPartidoHash: acta[0],
         hashActa: acta[1],
         arbitroId: acta[2],
         vocalId: acta[3],
-        golesLocal: acta[4],
-        golesVisitante: acta[5],
-        timestamp: acta[6]
+        golesLocal: Number(acta[4]),
+        golesVisitante: Number(acta[5]),
+        timestamp: Number(acta[6])
       }
     };
   } catch (error) {
-    console.error("Error obteniendo acta de blockchain:", error);
+    console.error("❌ Error obteniendo acta de blockchain:", error);
     return {
       success: false,
-      error: error.message
+      error: error.shortMessage || error.message
     };
   }
 }
