@@ -11,10 +11,11 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: Number(process.env.DB_PORT),
+  ssl: { rejectUnauthorized: false }, // importante para Railway
 });
 
 pool.on('connect', () => {
-  console.log('✅ Conectado a la base de datos PostgreSQL en Railway');
+  console.log('Conectado a la base de datos PostgreSQL en Railway');
 });
 
 export default pool;
