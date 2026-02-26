@@ -147,3 +147,9 @@ TRUNCATE TABLE partidos RESTART IDENTITY CASCADE;
  public  | partidos          | tabla | postgres
  public  | usuarios          | tabla | postgres
 (11 filas)
+
+DB_USER=postgres
+DB_PASSWORD=ZLrjnjQZrivTmrMwTowFqunFDoYXyvLe
+DB_HOST=switchback.proxy.rlwy.net
+DB_PORT=53135
+DB_NAME=railway
