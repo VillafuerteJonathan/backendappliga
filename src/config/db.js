@@ -1,3 +1,4 @@
+// config/db.js
 import pkg from 'pg';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -13,7 +14,7 @@ const pool = new Pool({
 });
 
 pool.on('connect', () => {
-  console.log('Conectado a la base de datos PostgreSQL');
+  console.log('✅ Conectado a la base de datos PostgreSQL en Railway');
 });
 
 export default pool;

@@ -9,7 +9,7 @@ router.post('/', DelegadosController.crear);       // Crear uno nuevo
 router.put('/:id', DelegadosController.actualizar); // Actualizar por ID
 
 router.patch('/:id/habilitar', DelegadosController.habilitar);
-router.patch('  /:id/deshabilitar', DelegadosController.deshabilitar);
+router.patch('/:id/deshabilitar', DelegadosController.deshabilitar);
 
 router.delete('/:id', DelegadosController.eliminar); // Eliminar por ID
 

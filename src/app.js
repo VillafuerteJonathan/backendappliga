@@ -22,7 +22,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 // Crear admin al arrancar
-UsuarioService.crearAdmin();
 
 // Rutas
 app.use('/api/auth', authRoutes);

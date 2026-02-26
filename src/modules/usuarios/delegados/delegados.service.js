@@ -60,8 +60,7 @@ Por favor cambia tu contraseña al iniciar sesión.`,
           <h3>Hola ${nombre}</h3>
           <p>Tu cuenta de <b>delegado</b> ha sido creada.</p>
           <p><b>Usuario:</b> ${correo}</p>
-          <p><b>Contraseña temporal:</b> ${password}</p>
-          <p>⚠️ Cambia tu contraseña al iniciar sesión.</p>
+          <p><b>Contraseña :</b> ${password}</p>
         `
       });
     } catch (error) {
